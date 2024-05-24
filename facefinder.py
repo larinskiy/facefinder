@@ -13,8 +13,6 @@ def get_records(domain, type):
     try:
         records = dns.resolver.resolve(domain, type)
         for record in records:
-            print(str(record))
-            print(str(record).split(' ')[-1])
             if len(str(record).split(' ')) > 1:
                 out_records.add(
                     str(record).split(' ')[-1])
