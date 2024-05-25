@@ -8,7 +8,7 @@
 ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝
 A tool for searching domains, IPv4 and CIDR of companies by certificates
 https://github.com/larinskiy/facefinder
-Based on tools: cert.sh -> dns lookup -> whois
+Based on tools: crt.sh -> dns lookup -> whois
 After program complete, check files out_domains.txt, out_ips.txt and out_cidrs.txt
 </pre>
 

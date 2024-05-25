@@ -105,7 +105,7 @@ print('\
 ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝\n\
 A tool for searching domains, IPv4 and CIDR of companies by certificates\n\
 https://github.com/larinskiy/facefinder\n\n\
-Based on tools: cert.sh -> dns lookup -> whois\n\n\
+Based on tools: crt.sh -> dns lookup -> whois\n\n\
 After program complete, check files out_domains.txt, out_ips.txt and out_cidrs.txt\n')
 
 parser = argparse.ArgumentParser()
