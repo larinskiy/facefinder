@@ -20,15 +20,15 @@ After program complete, check files out_domains.txt, out_ips.txt and out_cidrs.t
 
 `python facefinder.py` - run FaceFinder in interactive mode
 
-`python facefinder.py -d <DOMAIN or COMPANY>` - perform search for specified domain name or company name
+`python facefinder.py -d <DOMAIN or COMPANY>` - perform search for specified DOMAIN or COMPANY name
 
-`python facefinder.py -dl <DOMAIN FILE>` - perform procedures for specified domain names in DOMAIN FILE
+`python facefinder.py -dl <DOMAIN FILE>` - perform IP, CIDR search for specified domain names in DOMAIN FILE
 
 `python facefinder.py -il <IP FILE>` - perform CIDR search for specified IPs in IP FILE
 
 `python facefinder.py -pd <PRIMARY DOMAIN NAME>` - perform all procedures and MX/NS request for specified PRIMARY DOMAIN NAME
 
-## Installation
+## Ouput files
 
 Output files are:
 
