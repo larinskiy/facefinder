@@ -118,7 +118,7 @@ print(f'{bcolors.HEADER}\
 A tool for searching domains, IPv4 and CIDR of companies by company name\n\
 https://github.com/larinskiy/facefinder{bcolors.ENDC}\n\n\
 Based on tools: crt.sh -> dns lookup , bgp.he.net\n\n\
-After program complete, check files out_domains.txt, out_ips.txt and out_cidrs.txt\n')
+After program complete, check files domains.txt, ips.txt and cidrs.txt\n')
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
