@@ -5,6 +5,7 @@ import argparse
 import os
 from time import sleep
 import dns.resolver
+from googlesearch import search
 
 
 class bcolors:
@@ -17,6 +18,72 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+
+def get_first_domain(company_name):
+    query = company_name
+    for url in search(query, num=1, stop=1, pause=2):
+        domain = url.split('//')[-1].split('/')[0]
+        os.remove('./.google-cookie')
+        return domain
+
+
+def get_domains(company_name):
+    print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Perfoming request to Crt.sh for {
+          company_name} ...')
+    response = None
+    while not response:
+        try:
+            response = pd.read_html(
+                f"https://crt.sh/?q={company_name}&exclude=expired&group=none")
+        except:
+            print(f'[{bcolors.WARNING}!{
+                bcolors.ENDC}] Crt.sh is unavailable. Trying again after 10 seconds...')
+            sleep(10)
+    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Crt.sh response')
+    if response[1][1][0] != 'None found':
+        identities = set()
+        for record in set(response[2]["Matching Identities"]):
+            identities = identities.union(record.split())
+        domains = set(response[2]["Common Name"]).union(
+            identities)
+        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(domains)
+                                                    } domain names successfully collected')
+        return sorted(set([domain.strip() for domain in domains]))
+    else:
+        print(f'[{bcolors.WARNING}!{
+            bcolors.ENDC}] No discovered certs on Crt.sh for {company_name}. Trying perform request for primary name...')
+        global prime_domain
+        if not args.primary_domain:
+            prime_domain = input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Primary domain name is set to {
+                get_first_domain(comp)}. If it is valid, press enter. If not - enter valid primary domain: [For ex. amazon.com] ') or get_first_domain(company_name)
+        else:
+            prime_domain = args.primary_domain
+        print(
+            f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Primary domain name is set to {prime_domain}')
+        response = None
+        while not response:
+            try:
+                response = pd.read_html(
+                    f"https://crt.sh/?q={prime_domain}&exclude=expired&group=none")
+            except:
+                print(f'[{bcolors.WARNING}!{
+                    bcolors.ENDC}] Crt.sh is unavailable. Trying again after 10 seconds...')
+                sleep(10)
+        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Crt.sh response')
+        if response[1][1][0] != 'None found':
+            identities = set()
+            for record in set(response[2]["Matching Identities"]):
+                identities = identities.union(record.split())
+            domains = set(response[2]["Common Name"]).union(
+                identities)
+            print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(domains)
+                                                        } domain names successfully collected')
+            return sorted(set([domain.strip() for domain in domains]))
+        else:
+            print(f'[{bcolors.WARNING}!{
+                bcolors.ENDC}] No discovered certs on Crt.sh. Skipped domains verification')
+            return set()
 
 
 def get_records(domain, type):
@@ -133,74 +200,53 @@ args = parser.parse_args()
 
 # Get subdomain set
 domain = set()
+prime_domain = None
 if not args.domain_list:
     if not args.domain:
         comp = input(
-            f"[{bcolors.OKBLUE}?{bcolors.ENDC}] Enter the company name or domain name to search for subdomains without spaces (For example, Amazon or amazon.com): ")
+            f"[{bcolors.OKBLUE}?{bcolors.ENDC}] Enter the company name to search for subdomains without spaces (For example, Amazon): ")
     else:
         comp = args.domain
-        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company name/domain set to {comp}')
-    print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Perfoming request to Crt.sh ...')
-    response = None
-    while not response:
-        try:
-            response = pd.read_html(
-                f"https://crt.sh/?q={comp}&exclude=expired&group=none")
-        except:
-            print(f'[{bcolors.WARNING}!{
-                bcolors.ENDC}] Crt.sh is unavailable. Trying again after 10 seconds...')
-            sleep(10)
-    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Crt.sh response')
-    if response[1][1][0] != 'None found':
-        identities = set()
-        for record in set(response[2]["Matching Identities"]):
-            identities = identities.union(record.split())
-        domains = set(response[2]["Common Name"]).union(
-            identities)
-        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(domains)
-                                                    } domain names successfully collected')
-        domains = sorted(set([domain.strip() for domain in domains]))
-    else:
-        exit(f'[{bcolors.FAIL}-{bcolors.ENDC}] No discovered certs on Crt.sh')
+        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company name set to {comp}')
+    domains = get_domains(comp)
 elif os.path.isfile(args.domain_list):
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Founded domain list file')
     with open(args.domain_list) as file:
         for record in file:
-            domain = domain.union(record.strip())
+            domains = domains.union(record.strip())
 
 # Perfom MX and NS search
-if not args.primary_domain:
-    prime_domain = input(
-        f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Do you want to perform MX/NS search? Enter primary domain name if you want, or enter to skip: [For.ex. amazon.com] ')
-else:
-    prime_domain = args.primary_domain
-    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Primary domain name is set to {prime_domain}')
-if prime_domain:
-    mx_domains = get_records(prime_domain, 'MX')
-    ns_domains = get_records(prime_domain, 'NS')
-    if len(mx_domains) != 0 or len(ns_domains) != 0:
-        domains = set(mx_domains).union(set(ns_domains)).union(domains)
-        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(mx_domains)} MX names and {
-            len(ns_domains)} NS names was discovered')
+if not prime_domain:
+    if not args.primary_domain:
+        prime_domain = input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Primary domain name is set to {
+            get_first_domain(comp)}. If it is valid, press enter. If not - enter valid primary domain: [For ex. amazon.com] ') or get_first_domain(comp)
     else:
-        print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] MX and NS records now found')
+        prime_domain = args.primary_domain
+        print(
+            f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Primary domain name is set to {prime_domain}')
+mx_domains = get_records(prime_domain, 'MX')
+ns_domains = get_records(prime_domain, 'NS')
+if len(mx_domains) != 0 or len(ns_domains) != 0:
+    domains = set(mx_domains).union(set(ns_domains)).union(domains)
+    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(mx_domains)} MX names and {
+        len(ns_domains)} NS names was discovered')
+else:
+    print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] MX and NS records not found')
 
 # Check domain records
 if len(domains):
     found_addr = check_domains_records(domains)
 else:
-    exit(f'[{bcolors.FAIL}-{bcolors.ENDC}] No discovered domains')
+    print(f'[{bcolors.WARNING}!{
+          bcolors.ENDC}] No discovered domains. Skipped checking domain records')
+    found_addr = set()
 
 # Check if each domain exists
-if len(found_addr) and not (args.ip_list):
+if len(found_addr):
     ipv4_addresses = get_ipv4_addresses(found_addr)
-elif os.path.isfile(args.ip_list):
-    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Founded IP list file')
-    with open(args.ip_list) as file:
-        for record in file:
-            ipv4_addresses = ipv4_addresses.union(record.strip())
 else:
-    exit(f'[{bcolors.FAIL}-{bcolors.ENDC}] No discovered records for domains')
+    print(f'[{bcolors.WARNING}!{
+          bcolors.ENDC}] No discovered records. Skipped cheching IP addresses')
 
 # Get CIDRs for company
 get_cidrs(comp)
