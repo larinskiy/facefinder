@@ -112,6 +112,7 @@ def get_ipv4_addresses(domains):
             pass
         tqdm.set_postfix(bar, IPs=len(ipv4_addresses))
     if len(ipv4_addresses) != 0:
+        ipv4_addresses = sorted(ipv4_addresses)
         with open(f'ips_{comp}.txt', 'w') as file:
             print(f'Number of detected IP addresses: {
                 len(ipv4_addresses)}', file=file)
@@ -135,6 +136,8 @@ def check_domains_records(domains):
             not_found_addr.append(domain)
         tqdm.set_postfix(bar, Records=len(found_addr),
                          NoRecords=len(not_found_addr))
+    found_addr = sorted(found_addr)
+    not_found_addr = sorted(not_found_addr)
     with open(f'domains_{comp}.txt', 'w') as file:
         print(f'Number of domains with addressess: {
               len(found_addr)}', file=file)
@@ -160,7 +163,8 @@ def get_cidrs(comp):
             sleep(10)
     response = response[0]
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Bgp.he.net repsonse')
-    subnets = set(response[response['Type'].str.contains('Route')]['Result'])
+    subnets = sorted(
+        set(response[response['Type'].str.contains('Route')]['Result']))
     if len(subnets) != 0:
         with open(f'cidrs_{comp}.txt', 'w') as file:
             print(f'Number of subnets detected: {len(subnets)}', file=file)
