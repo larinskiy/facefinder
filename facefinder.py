@@ -197,8 +197,6 @@ parser.add_argument(
 parser.add_argument(
     '--domain-list', '-dl', help='Path to existing domain list (Do not request Crt.sh)')
 parser.add_argument(
-    '--ip-list', '-il', help='Path to existing IP list (Do not perform IP collecting)')
-parser.add_argument(
     '--primary-domain', '-pd', help='Perform NS and MX request for primary domain')
 args = parser.parse_args()
 
