@@ -1,6 +1,5 @@
 import socket
 from tqdm import tqdm
-import ipwhois
 import pandas as pd
 import argparse
 import os
@@ -81,27 +80,26 @@ def check_domains_records(domains):
     return found_addr
 
 
-def get_cidrs(ipv4_addresses):
-    subnets = set()
-    keywords = input(
-        f"[{bcolors.OKBLUE}?{bcolors.ENDC}] Enter the keywords separated by a space to search for ASN (For example, Amazon AZ): ").lower().split()
-    bar = tqdm(ipv4_addresses, desc=f"Searching CIDRs", unit="ip")
-    for addr in bar:
+def get_cidrs(comp):
+    response = None
+    print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Perfoming request to Bgp.he.net ...')
+    while not response:
         try:
-            info = ipwhois.IPWhois(addr).lookup_whois()
-            if any(keyword.lower() in info['asn_description'].lower() for keyword in keywords):
-                subnets.add(net['asn_cidr'])
-            else:
-                for net in info['nets']:
-                    if any(keyword.lower() in net['description'].lower() for keyword in keywords):
-                        subnets.add(net['cidr'])
+            response = pd.read_html(
+                f"https://bgp.he.net/search?search%5Bsearch%5D={comp}&commit=Search")
         except:
-            pass
-        tqdm.set_postfix(bar, CIDRs=len(subnets))
+            print(f'[{bcolors.WARNING}!{
+                bcolors.ENDC}] Bgp.he.net is unavailable. Trying again after 10 seconds...')
+            sleep(10)
+    response = response[0]
+    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Bgp.he.net repsonse')
+    subnets = set(response[response['Type'].str.contains('Route')]['Result'])
     if len(subnets) != 0:
         with open(f'cidrs_{comp}.txt', 'w') as file:
             print(f'Number of subnets detected: {len(subnets)}', file=file)
             print('Subnets:\n', '\n'.join(subnets), file=file)
+        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(subnets)
+                                                    } CIDRs successfully collected')
         print(
             f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Discovered CIDRs collected in cirds_{comp}.txt')
     else:
@@ -117,9 +115,9 @@ print(f'{bcolors.HEADER}\
 ██╔══╝  ██╔══██║██║     ██╔══╝      ██╔══╝  ██║██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗\n\
 ██║     ██║  ██║╚██████╗███████╗    ██║     ██║██║ ╚████║██████╔╝███████╗██║  ██║\n\
 ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝\n\
-A tool for searching domains, IPv4 and CIDR of companies by certificates\n\
+A tool for searching domains, IPv4 and CIDR of companies by company name\n\
 https://github.com/larinskiy/facefinder{bcolors.ENDC}\n\n\
-Based on tools: crt.sh -> dns lookup -> whois\n\n\
+Based on tools: crt.sh -> dns lookup , bgp.he.net\n\n\
 After program complete, check files out_domains.txt, out_ips.txt and out_cidrs.txt\n')
 
 parser = argparse.ArgumentParser()
@@ -152,7 +150,7 @@ if not args.domain_list:
             print(f'[{bcolors.WARNING}!{
                 bcolors.ENDC}] Crt.sh is unavailable. Trying again after 10 seconds...')
             sleep(10)
-    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Crt.sh repsonse')
+    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Crt.sh response')
     if response[1][1][0] != 'None found':
         identities = set()
         for record in set(response[2]["Matching Identities"]):
@@ -163,7 +161,7 @@ if not args.domain_list:
                                                     } domain names successfully collected')
         domains = sorted(set([domain.strip() for domain in domains]))
     else:
-        exit(f'[{bcolors.FAIL}-{bcolors.ENDC}] No discovered certs on Cert.sh')
+        exit(f'[{bcolors.FAIL}-{bcolors.ENDC}] No discovered certs on Crt.sh')
 elif os.path.isfile(args.domain_list):
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Founded domain list file')
     with open(args.domain_list) as file:
@@ -205,7 +203,4 @@ else:
     exit(f'[{bcolors.FAIL}-{bcolors.ENDC}] No discovered records for domains')
 
 # Get CIDRs for company
-if len(ipv4_addresses):
-    get_cidrs(ipv4_addresses)
-else:
-    print(f'[{bcolors.FAIL}-{bcolors.ENDC}] No discovered IP addresses')
+get_cidrs(comp)
