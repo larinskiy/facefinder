@@ -30,11 +30,15 @@ After program complete, check files domains.txt, ips.txt and cidrs.txt
 
 Output files are:
 
-`domain_<DOMAIN or COMPANY>.txt` - list of domains with A records and without A records
+`domain_<COMPANY>.txt` - list of domains with records, mask domains and without records
 
-`ip_<DOMAIN or COMPANY>.txt` - list of IPv4 address founded during nslookup procedures of domains
+`ip_<COMPANY>.txt` - list of IPv4 address founded during nslookup procedures of domains
 
-`cidrs_<DOMAIN or COMPANY>.txt` - list of CIDRs discovered during whois request for IPv4 addresses
+`cidrs_<COMPANY>.txt` - list of CIDRs discovered during whois request for IPv4 addresses
 
 ## Bugs
-If you find bugs in the operation of this program, be sure to let me know about them. This tool was developed spontaneously, but its support continues. Report bugs in this repository.
+1. **No addresses found.**
+
+Your firewall may block program requests to services required for validation. Before using the program, make sure that the firewall rules allow these requests. The program uses queries to Google services, DNS, Crt.sh and Bgp.he.net.
+
+_If you find bugs in the operation of this program, be sure to let me know about them. This tool was developed spontaneously, but its support continues. Report bugs in this repository._
