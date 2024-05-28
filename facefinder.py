@@ -55,8 +55,8 @@ def get_domains(company_name):
             bcolors.ENDC}] No discovered certs on Crt.sh for {company_name}. Trying perform request for primary name...')
         global prime_domain
         if not args.primary_domain:
-            prime_domain = input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Primary domain name is set to {
-                get_first_domain(comp)}. If it is valid, press enter. If not - enter valid primary domain: [For ex. amazon.com] ') or get_first_domain(company_name)
+            prime_domain = input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Primary domain name is set to {bcolors.UNDERLINE}{
+                get_first_domain(comp)}{bcolors.ENDC}. If it is valid, press enter. If not - enter valid primary domain: [For ex. amazon.com] ') or get_first_domain(company_name)
         else:
             prime_domain = args.primary_domain
         print(
@@ -116,7 +116,8 @@ def get_ipv4_addresses(domains):
         with open(f'ips_{comp}.txt', 'w') as file:
             print(f'Number of detected IP addresses: {
                 len(ipv4_addresses)}', file=file)
-            print('IPs:\n', '\n'.join(ipv4_addresses), file=file)
+            print('IPs:', file=file)
+            print('\n'.join(ipv4_addresses), file=file)
             print(
                 f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Discovered IPs collected in ips_{comp}.txt')
     else:
@@ -126,25 +127,35 @@ def get_ipv4_addresses(domains):
 
 def check_domains_records(domains):
     found_addr = []
+    masks_addr = []
     not_found_addr = []
     bar = tqdm(domains, desc=f"Checking records", unit="domain")
     for domain in bar:
-        try:
-            socket.getaddrinfo(domain, 0, 0, 0, 0)
-            found_addr.append(domain)
-        except:
-            not_found_addr.append(domain)
-        tqdm.set_postfix(bar, Records=len(found_addr),
-                         NoRecords=len(not_found_addr))
-    found_addr = sorted(found_addr)
-    not_found_addr = sorted(not_found_addr)
+        if '*' in domain:
+            masks_addr.append(domain)
+        elif '.' in domain:
+            try:
+                socket.getaddrinfo(domain, 0, 0, 0, 0)
+                found_addr.append(domain)
+            except:
+                not_found_addr.append(domain)
+            tqdm.set_postfix(bar, Records=len(found_addr),
+                             NoRecords=len(not_found_addr))
+        found_addr = sorted(found_addr)
+        not_found_addr = sorted(not_found_addr)
     with open(f'domains_{comp}.txt', 'w') as file:
-        print(f'Number of domains with addressess: {
+        print(f'Number of domains with addresses: {
               len(found_addr)}', file=file)
-        print('Domain names:\n', '\n'.join(found_addr), file=file)
-        print(f'Number of domains without addressess: {
+        print('Domain names:', file=file)
+        print('\n'.join(found_addr), file=file)
+        print(f'\nNumber of domains with masks: {
+              len(masks_addr)}', file=file)
+        print('Domain names:', file=file)
+        print('\n'.join(masks_addr), file=file)
+        print(f'\nNumber of domains without addresses: {
               len(not_found_addr)}', file=file)
-        print('Domain names:\n', '\n'.join(not_found_addr), file=file)
+        print('Domain names:', file=file)
+        print('\n'.join(not_found_addr), file=file)
         print(
             f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Results collected in domains_{comp}.txt')
     return found_addr
@@ -168,7 +179,8 @@ def get_cidrs(comp):
     if len(subnets) != 0:
         with open(f'cidrs_{comp}.txt', 'w') as file:
             print(f'Number of subnets detected: {len(subnets)}', file=file)
-            print('Subnets:\n', '\n'.join(subnets), file=file)
+            print('Subnets:', file=file)
+            print('\n'.join(subnets), file=file)
         print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(subnets)
                                                     } CIDRs successfully collected')
         print(
@@ -209,7 +221,8 @@ if not args.domain_list:
             f"[{bcolors.OKBLUE}?{bcolors.ENDC}] Enter the company name to search for domains without spaces (For example, Amazon): ")
     else:
         comp = args.domain
-        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company name set to {comp}')
+        print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company name set to {
+              bcolors.UNDERLINE}{comp}{bcolors.ENDC}')
     domains = domains.union(get_domains(comp))
 elif os.path.isfile(args.domain_list):
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Founded domain list file')
@@ -220,12 +233,12 @@ elif os.path.isfile(args.domain_list):
 # Perfom MX and NS search
 if not prime_domain:
     if not args.primary_domain:
-        prime_domain = input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Primary domain name is set to {
-            get_first_domain(comp)}. If it is valid, press enter. If not - enter valid primary domain: [For ex. amazon.com] ') or get_first_domain(comp)
+        prime_domain = input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Primary domain name is set to {bcolors.UNDERLINE}{
+            get_first_domain(comp)}{bcolors.ENDC}. If it is valid, press enter. If not - enter valid primary domain: [For ex. amazon.com] ') or get_first_domain(comp)
     else:
         prime_domain = args.primary_domain
         print(
-            f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Primary domain name is set to {prime_domain}')
+            f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Primary domain name is set to {bcolors.UNDERLINE}{prime_domain}{bcolors.ENDC}')
 domains.add(prime_domain)
 mx_domains = get_records(prime_domain, 'MX')
 ns_domains = get_records(prime_domain, 'NS')
