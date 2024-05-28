@@ -79,7 +79,7 @@ def get_domains(company_name):
                 identities)
             print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(domains)
                                                         } domain names successfully collected')
-            return sorted(set([domain.strip() for domain in domains]))
+            return sorted(set([domain.strip() for domain in domains]).add(prime_domain))
         else:
             print(f'[{bcolors.WARNING}!{
                 bcolors.ENDC}] No discovered certs on Crt.sh. Skipped domains verification')
@@ -201,16 +201,16 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Get subdomain set
-domain = set()
+domains = set()
 prime_domain = None
 if not args.domain_list:
     if not args.domain:
         comp = input(
-            f"[{bcolors.OKBLUE}?{bcolors.ENDC}] Enter the company name to search for subdomains without spaces (For example, Amazon): ")
+            f"[{bcolors.OKBLUE}?{bcolors.ENDC}] Enter the company name to search for domains without spaces (For example, Amazon): ")
     else:
         comp = args.domain
         print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company name set to {comp}')
-    domains = get_domains(comp)
+    domains = domains.union(get_domains(comp))
 elif os.path.isfile(args.domain_list):
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Founded domain list file')
     with open(args.domain_list) as file:
@@ -226,6 +226,7 @@ if not prime_domain:
         prime_domain = args.primary_domain
         print(
             f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Primary domain name is set to {prime_domain}')
+domains.add(prime_domain)
 mx_domains = get_records(prime_domain, 'MX')
 ns_domains = get_records(prime_domain, 'NS')
 if len(mx_domains) != 0 or len(ns_domains) != 0:
