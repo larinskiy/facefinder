@@ -23,7 +23,7 @@ class bcolors:
 def get_first_domain(company_name):
     query = company_name
     for url in search(query, num=1, stop=1, pause=2):
-        domain = url.split('//')[-1].split('/')[0]
+        domain = url.split('//')[-1].split('/')[0].replace('www.', '')
         os.remove('./.google-cookie')
         return domain
 
