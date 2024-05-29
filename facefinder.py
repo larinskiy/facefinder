@@ -114,13 +114,13 @@ def get_ipv4_addresses(domains):
         tqdm.set_postfix(bar, IPs=len(ipv4_addresses))
     if len(ipv4_addresses) != 0:
         ipv4_addresses = sorted(ipv4_addresses)
-        with open(f'ips_{comp}.txt', 'w') as file:
+        with open(f'{comp}_ips.txt', 'w') as file:
             print(f'Number of detected IP addresses: {
                 len(ipv4_addresses)}', file=file)
             print('IPs:', file=file)
             print('\n'.join(ipv4_addresses), file=file)
             print(
-                f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Discovered IPs collected in ips_{comp}.txt')
+                f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Discovered IPs collected in {comp}_ips.txt')
     else:
         exit(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] No discovered IPs')
     return sorted(ipv4_addresses)
@@ -144,7 +144,7 @@ def check_domains_records(domains):
                              NoRecords=len(not_found_addr))
         found_addr = sorted(found_addr)
         not_found_addr = sorted(not_found_addr)
-    with open(f'domains_{comp}.txt', 'w') as file:
+    with open(f'{comp}_domains.txt', 'w') as file:
         print(f'Number of domains with addresses: {
               len(found_addr)}', file=file)
         print('Domain names:', file=file)
@@ -158,7 +158,7 @@ def check_domains_records(domains):
         print('Domain names:', file=file)
         print('\n'.join(not_found_addr), file=file)
         print(
-            f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Results collected in domains_{comp}.txt')
+            f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Results collected in {comp}_domains.txt')
     return found_addr
 
 
@@ -178,14 +178,14 @@ def get_cidrs(comp):
     subnets = sorted(
         set(response[response['Type'].str.contains('Route')]['Result']))
     if len(subnets) != 0:
-        with open(f'cidrs_{comp}.txt', 'w') as file:
+        with open(f'{comp}_cidrs.txt', 'w') as file:
             print(f'Number of subnets detected: {len(subnets)}', file=file)
             print('Subnets:', file=file)
             print('\n'.join(subnets), file=file)
         print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(subnets)
                                                     } CIDRs successfully collected')
         print(
-            f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Discovered CIDRs collected in cirds_{comp}.txt')
+            f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Discovered CIDRs collected in {comp}_cirds.txt')
     else:
         print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] No discovered CIDRs')
     return subnets
@@ -266,4 +266,4 @@ else:
           bcolors.ENDC}] No discovered records. Skipped cheching IP addresses')
 
 # Get CIDRs for company
-get_cidrs(comp)
+get_cidrs(comp.split('.')[0])
