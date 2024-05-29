@@ -79,7 +79,8 @@ def get_domains(company_name):
                 identities)
             print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] {len(domains)
                                                         } domain names successfully collected')
-            return sorted(set([domain.strip() for domain in domains]).add(prime_domain))
+            domains.add(prime_domain)
+            return sorted(domains)
         else:
             print(f'[{bcolors.WARNING}!{
                 bcolors.ENDC}] No discovered certs on Crt.sh. Skipped domains verification')
