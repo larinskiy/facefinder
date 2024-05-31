@@ -32,7 +32,8 @@ def get_domains(company_name):
     print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Perfoming request to Crt.sh for {
           company_name} ...')
     response = None
-    while not response:
+    count = 0
+    while not response or count == 5:
         try:
             response = pd.read_html(
                 f"https://crt.sh/?q={company_name}&exclude=expired&group=none")
@@ -40,6 +41,11 @@ def get_domains(company_name):
             print(f'[{bcolors.WARNING}!{
                 bcolors.ENDC}] Crt.sh is unavailable. Trying again after 10 seconds...')
             sleep(10)
+            count += 1
+        if response is None:
+            print(f'[{bcolors.WARNING}!{
+                bcolors.ENDC}] Crt.sh is unavailable. Skipped domains verification')
+            return set()
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Crt.sh response')
     if response[1][1][0] != 'None found':
         identities = set()
@@ -62,7 +68,8 @@ def get_domains(company_name):
         print(
             f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Primary domain name is set to {prime_domain}')
         response = None
-        while not response:
+        count = 0
+        while not response or count == 5:
             try:
                 response = pd.read_html(
                     f"https://crt.sh/?q={prime_domain}&exclude=expired&group=none")
@@ -70,6 +77,11 @@ def get_domains(company_name):
                 print(f'[{bcolors.WARNING}!{
                     bcolors.ENDC}] Crt.sh is unavailable. Trying again after 10 seconds...')
                 sleep(10)
+                count += 1
+        if response is None:
+            print(f'[{bcolors.WARNING}!{
+                bcolors.ENDC}] Crt.sh is unavailable. Skipped domains verification')
+            return set()
         print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got Crt.sh response')
         if response[1][1][0] != 'None found':
             identities = set()
