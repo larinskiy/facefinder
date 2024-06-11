@@ -6,6 +6,8 @@ import os
 from time import sleep
 import dns.resolver
 from googlesearch import search
+from bs4 import BeautifulSoup
+import requests
 
 
 class bcolors:
@@ -18,6 +20,47 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+
+def get_info(comp):
+    response = None
+    print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Perfoming request to List-org.com ...')
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) \
+        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
+    }
+    count = 0
+    while not response or count == 5:
+        try:
+            response = requests.get(url=f"https://www.list-org.com/search?val={comp}&type=all&sort=", headers=headers).text
+        except:
+            print(f'[{bcolors.WARNING}!{
+                bcolors.ENDC}] List-org.com is unavailable. Trying again after 10 seconds...')
+            count += 1
+            sleep(10)
+    if response is None:
+            print(f'[{bcolors.WARNING}!{
+                bcolors.ENDC}] List-org.com is unavailable. Skipped company info collecting')
+            return set()
+    print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got List-org.com response')
+    soup = BeautifulSoup(response, 'html.parser')
+    organizations = soup.find_all('label')
+    if len(organizations) != 17:
+        org = organizations[0]
+        company_name = org.a.text
+        inn_kpp_tag = org.find('i', string='инн/кпп')
+        legal_address_tag = org.find('i', string='юр.адрес')
+        inn_kpp = inn_kpp_tag.next_sibling.strip()[2:]
+        legal_address = legal_address_tag.next_sibling.strip()[2:]
+        link = org.a['href']
+        return(f"{company_name} INN/KPP: {inn_kpp} Address: {legal_address}", link)
+    else:
+        answer=input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] No companies found. Provide INN/KPP/Full name of company or press Enter to skip this step:')
+        if answer == '':
+            print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Skipped company info collecting')
+            return False,False
+        else:
+            return(get_info(answer))
 
 
 def get_first_domain(company_name):
@@ -220,7 +263,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     '--domain', '-d', help='Domain name for resource collecting')
 parser.add_argument(
-    '--domain-list', '-dl', help='Path to existing domain list (Do not request Crt.sh)')
+    '--company-ident', '-cid', help='Company identificator (INN/KPP/Full name) for info collecting')
+parser.add_argument(
+    '--domain-list', '-dl', help='Path to existing domain list (Do not request Crt.sh and List-org.com)')
 parser.add_argument(
     '--primary-domain', '-pd', help='Perform NS and MX request for primary domain')
 args = parser.parse_args()
@@ -236,6 +281,21 @@ if not args.domain_list:
         comp = args.domain
         print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company name set to {
               bcolors.UNDERLINE}{comp}{bcolors.ENDC}')
+        
+    # Get company info
+    if not args.company_ident:
+        org, link = get_info(comp)
+    else:
+        org, link = get_info(args.company_ident)
+    if org and link:
+        print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Found company info: {org}')
+        answer = input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Press Enter if company info is correct, else provide INN/KPP/Full name of company:')
+        if answer:
+            org, link = get_info(answer)
+            print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Found company info: {org}')
+        else:
+            print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Successfully found company info')
+
     domains = domains.union(get_domains(comp))
 elif os.path.isfile(args.domain_list):
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Founded domain list file')

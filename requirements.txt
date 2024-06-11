@@ -3,3 +3,4 @@ ipwhois
 pandas
 lxml
 google
+bs4
