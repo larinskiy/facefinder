@@ -231,7 +231,7 @@ prime_domain = None
 if not args.domain_list:
     if not args.domain:
         comp = input(
-            f"[{bcolors.OKBLUE}?{bcolors.ENDC}] Enter the company name to search for domains without spaces (For example, Amazon): ")
+            f"[{bcolors.OKBLUE}?{bcolors.ENDC}] Enter the company name to search for domains without spaces [For ex. Amazon]: ")
     else:
         comp = args.domain
         print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company name set to {
