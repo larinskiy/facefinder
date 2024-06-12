@@ -1,6 +1,7 @@
 # FaceFinder
+
 <pre>
-███████╗ █████╗  ██████╗███████╗    ███████╗██╗███╗   ██╗██████╗ ███████╗██████╗ 
+███████╗ █████╗  ██████╗███████╗    ███████╗██╗███╗   ██╗██████╗ ███████╗██████╗
 ██╔════╝██╔══██╗██╔════╝██╔════╝    ██╔════╝██║████╗  ██║██╔══██╗██╔════╝██╔══██╗
 █████╗  ███████║██║     █████╗      █████╗  ██║██╔██╗ ██║██║  ██║█████╗  ██████╔╝
 ██╔══╝  ██╔══██║██║     ██╔══╝      ██╔══╝  ██║██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗
@@ -8,7 +9,7 @@
 ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝
 A tool for searching domains, IPv4 and CIDR of companies by company name
 https://github.com/larinskiy/facefinder
-Based on tools: crt.sh -> dns lookup , bgp.he.net
+Based on tools: list-org.com, crt.sh -> dns lookup , bgp.he.net
 After program complete, check files domains.txt, ips.txt and cidrs.txt
 </pre>
 
@@ -26,17 +27,20 @@ After program complete, check files domains.txt, ips.txt and cidrs.txt
 
 `python facefinder.py -pd <PRIMARY DOMAIN NAME>` - perform all procedures and MX/NS request for specified PRIMARY DOMAIN NAME
 
+`python facefinder.py -cid <INN/KPP/FULL NAME>` - perform list-org.com request for specified INN/KPP/FULL NAME
+
 ## Ouput files
 
 Output files are:
 
-`domain_<COMPANY>.txt` - list of domains with records, mask domains and without records
+`<COMPANY>_domains.txt` - list of domains with records, mask domains and without records
 
-`ip_<COMPANY>.txt` - list of IPv4 address founded during nslookup procedures of domains
+`<COMPANY>_ips.txt` - list of IPv4 address founded during nslookup procedures of domains
 
-`cidrs_<COMPANY>.txt` - list of CIDRs discovered during whois request for IPv4 addresses
+`<COMPANY>_cidrs.txt` - list of CIDRs discovered during whois request for IPv4 addresses
 
 ## Bugs
+
 1. **No addresses found.**
 
 Your firewall may block program requests to services required for validation. Before using the program, make sure that the firewall rules allow these requests. The program uses queries to Google services, DNS, Crt.sh and Bgp.he.net.

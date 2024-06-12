@@ -256,7 +256,7 @@ print(f'{bcolors.HEADER}\
 ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝\n\
 A tool for searching domains, IPv4 and CIDR of companies by company name\n\
 https://github.com/larinskiy/facefinder{bcolors.ENDC}\n\n\
-Based on tools: crt.sh -> dns lookup , bgp.he.net\n\n\
+Based on tools: list-org.com, crt.sh -> dns lookup , bgp.he.net\n\n\
 After program complete, check files domains.txt, ips.txt and cidrs.txt\n')
 
 parser = argparse.ArgumentParser()
@@ -294,9 +294,12 @@ if not args.domain_list:
             org, link = get_info(answer)
             print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Found company info: {org}')
         else:
-            print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Successfully found company info')
+            print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Common company info: https://list-org.com{link}')
+            print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company relationship map: https://list-org.com{link}/graph')
+            print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company on the map: https://list-org.com{link}/map')
+            print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Financial statements of the company: https://list-org.com{link}/report')
 
-    exit()
+    # Get company domains
     domains = domains.union(get_domains(comp))
 elif os.path.isfile(args.domain_list):
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Founded domain list file')
