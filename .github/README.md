@@ -9,7 +9,7 @@
 ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝
 A tool for searching domains, IPv4 and CIDR of companies by company name
 https://github.com/larinskiy/facefinder
-Based on tools: list-org.com, crt.sh -> dns lookup , bgp.he.net
+Based on tools: myseldon.com, list-org.com, crt.sh -> dns lookup , bgp.he.net
 After program complete, check files domains.txt, ips.txt and cidrs.txt
 </pre>
 

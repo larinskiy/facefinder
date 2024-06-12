@@ -53,12 +53,18 @@ def get_info(comp):
         inn_kpp = inn_kpp_tag.next_sibling.strip()[2:]
         legal_address = legal_address_tag.next_sibling.strip()[2:]
         link = org.a['href']
-        return(f"{company_name} INN/KPP: {inn_kpp} Address: {legal_address}", link)
+        response = requests.get(url=f"https://www.list-org.com{link}", headers=headers).text
+        soup = BeautifulSoup(response, 'html.parser')
+        for span in soup.find_all('span'):
+            if span.get_text(strip=True).isdigit() and len(span.get_text(strip=True)) == 13:
+                ogrn = span.get_text(strip=True)
+                break
+        return(f"{company_name} INN/KPP: {inn_kpp} OGRN: {ogrn} Address: {legal_address}", ogrn, link)
     else:
         answer=input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] No companies found. Provide INN/KPP/Full name of company or press Enter to skip this step:')
         if answer == '':
             print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Skipped company info collecting')
-            return False,False
+            return False,False,False
         else:
             return(get_info(answer))
 
@@ -256,7 +262,7 @@ print(f'{bcolors.HEADER}\
 ╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝\n\
 A tool for searching domains, IPv4 and CIDR of companies by company name\n\
 https://github.com/larinskiy/facefinder{bcolors.ENDC}\n\n\
-Based on tools: list-org.com, crt.sh -> dns lookup , bgp.he.net\n\n\
+Based on tools: myseldon.com, list-org.com, crt.sh -> dns lookup , bgp.he.net\n\n\
 After program complete, check files domains.txt, ips.txt and cidrs.txt\n')
 
 parser = argparse.ArgumentParser()
@@ -284,10 +290,10 @@ if not args.domain_list:
         
     # Get company info
     if not args.company_ident:
-        org, link = get_info(comp)
+        org, ogrn, link = get_info(comp)
     else:
-        org, link = get_info(args.company_ident)
-    if org and link:
+        org, ogrn, link = get_info(args.company_ident)
+    if org and link and ogrn:
         print(f'[{bcolors.OKBLUE}i{bcolors.ENDC}] Found company info: {org}')
         answer = input(f'[{bcolors.OKBLUE}?{bcolors.ENDC}] Press Enter if company info is correct, else provide INN/KPP/Full name of company:')
         if answer:
@@ -298,7 +304,7 @@ if not args.domain_list:
             print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company relationship map: https://list-org.com{link}/graph')
             print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Company on the map: https://list-org.com{link}/map')
             print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Financial statements of the company: https://list-org.com{link}/report')
-
+            print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Recebt news related to the company: https://basis.myseldon.com/ru/company/{ogrn}/news')
     # Get company domains
     domains = domains.union(get_domains(comp))
 elif os.path.isfile(args.domain_list):
