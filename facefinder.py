@@ -41,7 +41,7 @@ def get_info(comp):
     if response is None:
             print(f'[{bcolors.WARNING}!{
                 bcolors.ENDC}] List-org.com is unavailable. Skipped company info collecting')
-            return set()
+            return False,False
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Got List-org.com response')
     soup = BeautifulSoup(response, 'html.parser')
     organizations = soup.find_all('label')
@@ -296,6 +296,7 @@ if not args.domain_list:
         else:
             print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Successfully found company info')
 
+    exit()
     domains = domains.union(get_domains(comp))
 elif os.path.isfile(args.domain_list):
     print(f'[{bcolors.OKGREEN}+{bcolors.ENDC}] Founded domain list file')
