@@ -39,6 +39,10 @@ Output files are:
 
 `<COMPANY>_cidrs.txt` - list of CIDRs discovered during whois request for IPv4 addresses
 
+## Demo of interactive mode
+
+![Alt Text](/demo/demo.gif)
+
 ## Bugs
 
 1. **No addresses found.**
